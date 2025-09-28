@@ -26,8 +26,7 @@ export default {
 playwright.config.ts
 
 ```typescript
-import { defineCucumber } from '@qavajs/playwright-wdio';
-import { WdioOptions } from '@qavajs/playwright-wdio-fixtures';
+import { defineCucumber, WdioOptions } from '@qavajs/playwright-wdio';
 
 export default defineConfig<WdioOptions>({
     testDir: defineCucumber({
