@@ -4,7 +4,6 @@ require('./lib/actions.js');
 require('./lib/validations.js');
 require('./lib/memory.js');
 require('./lib/execute.js');
-require('./lib/intercept.js');
 require('./lib/storage.js');
 require('./lib/mock.js');
 require('./lib/poDefine.js');
