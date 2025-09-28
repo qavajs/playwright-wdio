@@ -1,0 +1,38 @@
+{
+  "name": "@qavajs/playwright-wdio",
+  "version": "0.0.1",
+  "description": "steps to interact with playwright wdio adapter",
+  "main": "./index.js",
+  "scripts": {
+    "build": "tsc",
+    "start:server": "ts-node test-e2e/support/server.ts",
+    "debug:e2e": "playwright test --config test-e2e/playwright.config.ts --ui",
+    "test:e2e": "playwright test --config test-e2e/playwright.e2e.config.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qavajs/playwright-wdio.git"
+  },
+  "authors": [
+    "Alexandr Galichenko"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/qavajs/playwright-wdio/issues"
+  },
+  "homepage": "https://github.com/qavajs/playwright-wdio#readme",
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.5.2",
+    "express": "^5.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.55.1",
+    "@qavajs/memory": "^1.10.2",
+    "@qavajs/playwright-runner-adapter": "^1.5.0",
+    "@qavajs/playwright-wdio-fixtures": "^0.0.2",
+    "webdriverio": "^9.20.0"
+  }
+}

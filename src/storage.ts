@@ -1,0 +1,57 @@
+import { When } from '@qavajs/playwright-runner-adapter';
+import type { MemoryValue } from './types';
+
+/**
+ * Set cookie
+ * @param {string} cookie - cookie name
+ * @param {string} value - value to set
+ * @example I set 'userID' cookie 'user1'
+ * @example I set 'userID' cookie '$userIdCookie'
+ */
+When('I set {value} cookie as {value}', async function (cookie: MemoryValue, value: MemoryValue) {
+    const cookieValue = await value.value();
+    const cookieObject = typeof cookieValue === 'object' ? cookieValue : { value: cookieValue };
+    await this.driver.setCookies([{ name: await cookie.value(), ...cookieObject }]);
+});
+
+/**
+ * Save cookie value to memory
+ * @param {string} cookie - cookie name
+ * @param {string} key - memory key
+ * @example I save value of 'auth' cookie as 'authCookie'
+ */
+When('I save value of {value} cookie as {value}', async function (cookie: MemoryValue, key: MemoryValue) {
+    const cookies = await this.driver.getCookies([await cookie.value()]);
+    key.set(cookies.pop());
+});
+
+/**
+ * Set value of local/session storage
+ * @param {string} storageKey - local/session storage key to set value
+ * @param {string} storageType - storage type (local or session)
+ * @param {string} value - value to set
+ * @example I set 'username' local storage value as 'user1'
+ * @example I set '$sessionStorageKey' session storage value as '$sessionStorageValue'
+ */
+When('I set {value} {word} storage value as {value}', async function (storageKey: MemoryValue, storageType: string, value: MemoryValue) {
+    await this.driver.execute(function (storageKey: string, storageType: string, value: any) {
+        const storage = storageType + 'Storage' as 'localStorage' | 'sessionStorage';
+        window[storage].setItem(storageKey, value);
+    }, await storageKey.value(), storageType, await value.value());
+});
+
+/**
+ * Save value of local/session storage to memory
+ * @param {string} storageKey - local/session storage key to set value
+ * @param {string} storageType - storage type (local or session)
+ * @param {string} key - memory key
+ * @example I save value of 'username' local storage as 'localStorageValue'
+ * @example I save value of '$sessionStorageKey' session storage value as 'sessionStorageValue'
+ */
+When('I save value of {value} {word} storage as {value}', async function (storageKey: MemoryValue, storageType: string, key: MemoryValue) {
+    const value = await this.driver.execute(function (storageKey: string, storageType: string) {
+        const storage = storageType + 'Storage' as 'localStorage' | 'sessionStorage';
+        return window[storage].getItem(storageKey);
+    }, await storageKey.value(), storageType);
+    key.set(value);
+});
