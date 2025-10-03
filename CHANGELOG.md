@@ -11,6 +11,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :microscope: - experimental
 
 ## [0.0.3]
+- :rocket: moved main declarations to package json
+
+## [0.0.3]
 - :beetle: added exports of `MemoryValue` and `Validation` types
 
 ## [0.0.2]

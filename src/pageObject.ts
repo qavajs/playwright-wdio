@@ -2,7 +2,7 @@ import type { ChainablePromiseArray, ChainablePromiseElement } from 'webdriverio
 
 type SelectorDefinition = string | ((argument: string) => string) | ((argument: any) => any) | null;
 
-export class Selector {
+class Selector {
     selector: SelectorDefinition;
     component!: Function;
     type: string = 'simple';
