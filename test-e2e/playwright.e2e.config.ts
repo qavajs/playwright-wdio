@@ -1,6 +1,5 @@
 import { defineConfig } from '@playwright/test';
-import { defineCucumber, tags } from '../index';
-import { WdioOptions } from '@qavajs/playwright-wdio-fixtures';
+import { defineCucumber, tags, WdioOptions } from '../lib';
 
 /**
  * Read environment variables from file.

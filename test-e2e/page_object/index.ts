@@ -1,4 +1,4 @@
-import { locator } from '../../src/pageObject';
+import { locator } from '../../lib';
 import { ChainablePromiseElement } from 'webdriverio';
 
 export default class App {

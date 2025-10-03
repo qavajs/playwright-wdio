@@ -1,5 +1,5 @@
 import { defineConfig } from '@playwright/test';
-import { defineCucumber, tags } from '../index';
+import { defineCucumber, tags } from '../lib';
 
 /**
  * Read environment variables from file.
