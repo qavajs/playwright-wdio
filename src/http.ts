@@ -1,7 +1,7 @@
-import { DataTable, When } from '@qavajs/playwright-runner-adapter';
-import { dataTable2Object, sendHttpRequest } from './utils/utils';
-import { QavajsPlaywrightWdioWorld } from './QavajsPlaywrightWdioWorld';
-import { MemoryValue } from './types';
+import { type DataTable, When } from '@qavajs/playwright-runner-adapter';
+import { dataTable2Object, sendHttpRequest } from './utils';
+import type { QavajsPlaywrightWdioWorld } from './QavajsPlaywrightWdioWorld';
+import type { MemoryValue } from './types';
 
 export class GraphQl {
     method = 'POST';

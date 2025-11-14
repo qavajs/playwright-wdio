@@ -1,7 +1,7 @@
 import type { Locator } from './pageObject';
-import {DataTable, When} from '@qavajs/playwright-runner-adapter';
+import { type DataTable, When } from '@qavajs/playwright-runner-adapter';
 import type { MemoryValue } from './types';
-import { dataTable2Object } from './utils/utils';
+import { dataTable2Object } from './utils';
 
 /**
  * Save text of element to memory

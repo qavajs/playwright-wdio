@@ -1,5 +1,5 @@
-import { QavajsPlaywrightWdioWorld } from './QavajsPlaywrightWdioWorld';
-import { ChainablePromiseElement } from 'webdriverio';
+import type { QavajsPlaywrightWdioWorld } from './QavajsPlaywrightWdioWorld';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 export class MemoryValue {
     constructor(public world: QavajsPlaywrightWdioWorld, public expression: string) {}

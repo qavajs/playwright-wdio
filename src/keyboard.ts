@@ -1,5 +1,5 @@
 import { When } from '@qavajs/playwright-runner-adapter';
-import { parseKeySequence } from './utils/utils';
+import { parseKeySequence } from './utils';
 
 /**
  * Press and hold keyboard key

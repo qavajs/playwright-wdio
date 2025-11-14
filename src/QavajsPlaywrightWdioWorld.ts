@@ -5,7 +5,7 @@ import memory from '@qavajs/memory';
 import { expect } from './validationExpect';
 import { element } from './pageObject';
 import type { Browser } from 'webdriverio';
-import { APIRequestContext } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
 
 export class QavajsPlaywrightWdioWorld extends TestWorld {
     test = test;

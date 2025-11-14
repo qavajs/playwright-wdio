@@ -1,6 +1,6 @@
 import { accessSync, constants, readdirSync, readFileSync } from 'node:fs';
 import { When } from '@qavajs/playwright-runner-adapter';
-import { MemoryValue } from './types';
+import type { MemoryValue } from './types';
 
 /**
  * Save file content to memory as buffer

@@ -1,5 +1,5 @@
 import { When } from '@qavajs/playwright-runner-adapter';
-import { MemoryValue } from './types';
+import type { MemoryValue } from './types';
 
 type ErrorReason = ('Failed' | 'Aborted' | 'TimedOut' | 'AccessDenied' | 'ConnectionClosed' | 'ConnectionReset' | 'ConnectionRefused' | 'ConnectionAborted' | 'ConnectionFailed' | 'NameNotResolved' | 'InternetDisconnected' | 'AddressUnreachable' | 'BlockedByClient' | 'BlockedByResponse');
 

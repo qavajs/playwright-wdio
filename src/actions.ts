@@ -1,8 +1,8 @@
 import { When } from '@qavajs/playwright-runner-adapter';
-import { QavajsPlaywrightWdioWorld } from './QavajsPlaywrightWdioWorld';
-import { parseCoords, parseCoordsAsObject, parseKeySequence, dragAndDrop } from './utils/utils';
-import { MemoryValue } from './types';
-import { Locator } from './pageObject';
+import type { QavajsPlaywrightWdioWorld } from './QavajsPlaywrightWdioWorld';
+import { parseCoords, parseCoordsAsObject, parseKeySequence, dragAndDrop } from './utils';
+import type { MemoryValue } from './types';
+import type { Locator } from './pageObject';
 
 /**
  * Opens provided url
