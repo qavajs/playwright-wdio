@@ -1,5 +1,5 @@
 import { When } from '@qavajs/playwright-runner-adapter';
-import { Locator } from './pageObject';
+import type { Locator } from './pageObject';
 import type { MemoryValue } from './types';
 
 function resolveFunction(script: string | Function) {

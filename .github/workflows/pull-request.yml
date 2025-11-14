@@ -7,11 +7,14 @@ on:
       - v1
       - v2
 
+permissions:
+  contents: read
+
 jobs:
   test:
     strategy:
       matrix:
-        version: [ 24 ]
+        version: [ 20, 22, 24 ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

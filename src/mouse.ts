@@ -1,5 +1,5 @@
-import { parseCoords, virtualPointer } from './utils/utils';
-import { Locator } from './pageObject';
+import { parseCoords, virtualPointer } from './utils';
+import type { Locator } from './pageObject';
 import { When } from '@qavajs/playwright-runner-adapter';
 import type { MemoryValue } from './types';
 

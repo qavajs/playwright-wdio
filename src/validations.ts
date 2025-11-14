@@ -1,8 +1,8 @@
-import { DataTable, Then } from '@qavajs/playwright-runner-adapter';
-import { QavajsPlaywrightWdioWorld } from './QavajsPlaywrightWdioWorld';
-import { dataTable2Array } from './utils/utils';
-import { MemoryValue, StateValidation, Validation } from './types';
-import { Locator } from './pageObject';
+import { type DataTable, Then } from '@qavajs/playwright-runner-adapter';
+import type { QavajsPlaywrightWdioWorld } from './QavajsPlaywrightWdioWorld';
+import { dataTable2Array } from './utils';
+import type { MemoryValue, StateValidation, Validation } from './types';
+import type { Locator } from './pageObject';
 
 /**
  * Verify element condition
