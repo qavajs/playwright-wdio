@@ -8,8 +8,10 @@ npm install @qavajs/playwright-wdio
 ```
 
 ## Configuration
-create `config.ts`
+create `qavajs.config.ts`
+
 ```typescript
+import {defineConfig } from "@qavajs/playwright-wdio";
 import Memory from './memory';
 import App from './page_object';
 
@@ -26,13 +28,11 @@ export default {
 playwright.config.ts
 
 ```typescript
-import { defineCucumber, WdioOptions } from '@qavajs/playwright-wdio';
+import { defineConfig } from '@playwright/test';
+import { WdioOptions } from '@qavajs/playwright-wdio';
 
 export default defineConfig<WdioOptions>({
-    testDir: defineCucumber({
-        config: 'config.ts',
-        profile: 'smoke'
-    }),
+    testMatch: 'qavajs.config.ts',
     projects: [
         {
             name: 'chrome',

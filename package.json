@@ -1,6 +1,6 @@
 {
   "name": "@qavajs/playwright-wdio",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "description": "steps to interact with playwright wdio adapter",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -23,17 +23,17 @@
   },
   "homepage": "https://github.com/qavajs/playwright-wdio#readme",
   "devDependencies": {
-    "@types/express": "^5.0.5",
-    "@types/node": "^24.10.1",
-    "express": "^5.1.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.2.1",
+    "express": "^5.2.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@playwright/test": "^1.56.1",
+    "@playwright/test": "^1.58.2",
     "@qavajs/memory": "^1.10.3",
-    "@qavajs/playwright-runner-adapter": "^1.8.0",
-    "@qavajs/playwright-wdio-fixtures": "^0.0.4",
-    "webdriverio": "^9.20.0"
+    "@qavajs/playwright-runner-adapter": "^2.0.1",
+    "@qavajs/playwright-wdio-fixtures": "^1.0.0",
+    "webdriverio": "^9.23.3"
   }
 }

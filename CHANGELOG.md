@@ -10,10 +10,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
-## [0.0.3]
-- :rocket: moved main declarations to package json
+## [1.0.0]
+- :rocket: release 1.0.0
 
 ## [0.0.3]
+- :rocket: moved main declarations to package json
 - :beetle: added exports of `MemoryValue` and `Validation` types
 
 ## [0.0.2]

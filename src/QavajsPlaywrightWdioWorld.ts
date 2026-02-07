@@ -1,4 +1,3 @@
-import { join } from 'node:path';
 import { TestWorld } from '@qavajs/playwright-runner-adapter';
 import { test } from '@qavajs/playwright-wdio-fixtures';
 import memory from '@qavajs/memory';
@@ -15,15 +14,15 @@ export class QavajsPlaywrightWdioWorld extends TestWorld {
     request!: APIRequestContext;
     expect = expect;
     element = element;
-    
+
     constructor(options: any) {
         super(options);
-        const config = require(join(process.cwd(), process.env.CONFIG ?? 'config.js'));
-        const profile = process.env.PROFILE ?? 'default';
-        this.config = config[profile];
-        memory.register(this.config.memory);
-        memory.setLogger(this);
-        this.memory = memory;
+        this.config = options.config;
+        if (this.config?.memory) {
+            memory.register(this.config.memory);
+            memory.setLogger(this);
+            this.memory = memory;
+        }
     }
 
     value(expression: string): any {

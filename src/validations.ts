@@ -182,7 +182,7 @@ Then(
         const attributeName = await attribute.value();
         const collection = await locator.collection().getElements();
         for (const element of collection) {
-            const value: string = await element.getAttribute(attributeName);
+            const value = await element.getAttribute(attributeName);
             validation(value, expectedValue);
         }
     }
