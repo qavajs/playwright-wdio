@@ -10,6 +10,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [1.1.0]
+- :rocket: updated adapter to make registration of beforeAll/afterAll hooks optional to enable pure parallelism
+
 ## [1.0.0]
 - :rocket: release 1.0.0
 
