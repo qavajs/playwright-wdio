@@ -8,12 +8,13 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "outDir": "lib",
+    "rootDir": "src",
     "declaration": true
   },
   "include": [
     "src/**/*.ts"
   ],
   "exclude": [
-    "test/**/*.spec.ts"
+    "test-e2e/**/*.ts"
   ]
 }

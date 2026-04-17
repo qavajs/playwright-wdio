@@ -285,7 +285,6 @@ Then(
         const failCounter = { fail: 0, pass: 0 };
         for (const value of array) {
             try {
-                console.log(value, expectedValue)
                 expect(value, expectedValue);
                 failCounter.pass++;
             } catch (err) {
@@ -415,7 +414,6 @@ function validateAllOf(AR: any, ERs: any[], validation: (AR: any, ER: any) => vo
     for (const ER of ERs) {
         try {
             validation(AR, ER);
-            return;
         } catch (err) {
             errorCollector.push(err as Error);
         }
