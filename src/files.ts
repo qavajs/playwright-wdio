@@ -1,4 +1,4 @@
-import { accessSync, constants, readdirSync, readFileSync } from 'node:fs';
+import { access, constants, readdir, readFile } from 'node:fs/promises';
 import { When } from '@qavajs/playwright-runner-adapter';
 import type { MemoryValue } from './types';
 
@@ -12,7 +12,7 @@ import type { MemoryValue } from './types';
  */
 When('I save {value} file content as {value}', async function (file: MemoryValue, memoryKey: MemoryValue) {
     const filePath = await file.value();
-    const fileContent = readFileSync(filePath);
+    const fileContent = await readFile(filePath);
     memoryKey.set(fileContent);
 });
 
@@ -26,7 +26,7 @@ When('I save {value} file content as {value}', async function (file: MemoryValue
  */
 When('I save {value} text file content as {value}', async function (file: MemoryValue, memoryKey: MemoryValue) {
     const filePath = await file.value();
-    const fileContent = readFileSync(filePath, 'utf-8');
+    const fileContent = await readFile(filePath, 'utf-8');
     memoryKey.set(fileContent);
 });
 
@@ -42,7 +42,7 @@ When('I save {value} text file content as {value}', async function (file: Memory
 When('I expect {value} text file content {validation} {value}', async function (file: MemoryValue, validation, expectedValue: MemoryValue) {
     const fileName = await file.value();
     const expected = await expectedValue.value();
-    const fileContent = readFileSync(fileName, 'utf-8');
+    const fileContent = await readFile(fileName, 'utf-8');
     validation(fileContent, expected);
 });
 
@@ -57,8 +57,8 @@ When('I expect {value} text file content {validation} {value}', async function (
 When('I expect file matching {value} regexp exists in {value}', async function (file: MemoryValue, dir: MemoryValue) {
     const fileNameRegexp = new RegExp(await file.value());
     const dirName = await dir.value();
-    await this.expect.poll(() => {
-        const fileList = readdirSync(dirName);
+    await this.expect.poll(async () => {
+        const fileList = await readdir(dirName);
         return fileList.find(f => fileNameRegexp.test(f));
     }, {
         message: `File matching '${fileNameRegexp}' does not exist`,
@@ -75,12 +75,12 @@ When('I expect file matching {value} regexp exists in {value}', async function (
  */
 When('I expect {value} file exists', async function (file: MemoryValue) {
     const fileName = await file.value();
-    await this.expect.poll(() => {
+    await this.expect.poll(async () => {
         try {
-            accessSync(fileName, constants.F_OK);
-            return true
-        } catch (err) {
-            return false
+            await access(fileName, constants.F_OK);
+            return true;
+        } catch {
+            return false;
         }
     }, {
         message: `File '${fileName}' does not exist`,

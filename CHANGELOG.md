@@ -10,6 +10,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [1.1.0]
+- :pencil: update dependencies (`@playwright/test` 1.59.1, `@qavajs/memory` 1.11.0, `@qavajs/playwright-runner-adapter` 2.3.0, `@qavajs/playwright-wdio-fixtures` 1.2.0, `webdriverio` 9.27.0, `typescript` 6.0.3)
+- :pencil: add `rootDir` to tsconfig.json
+
 ## [1.0.0]
 - :rocket: release 1.0.0
 
@@ -20,5 +24,5 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [0.0.2]
 - :rocket: update dependencies
 
-## [0.0.2]
+## [0.0.1]
 - :rocket: initial implementation
