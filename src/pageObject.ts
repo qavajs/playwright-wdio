@@ -130,7 +130,15 @@ export function element(this: any, path: string): Locator {
     const driver = this.driver as WebdriverIO.Browser;
     const logger = this;
     const logItem = (item: ChainItem) => `.$('${item.type === 'template' ? item.selector(item.argument) : item.selector}')`;
-    const log = (logChain: string) => logger.log(`${path} -> ${logChain.replace(/^\./, '')}`);
+    const logged = new Set<string>();
+    // Polling validations re-invoke the getter on every attempt - log a resolved chain once,
+    // so a single step does not end up with a stdout record per retry.
+    const log = (logChain: string) => {
+        const message = `${path} -> ${logChain.replace(/^\./, '')}`;
+        if (logged.has(message)) return;
+        logged.add(message);
+        logger.log(message);
+    };
     const getter: Locator = function () {
         let current = driver as unknown as ChainablePromiseElement;
         let logChain = '';
