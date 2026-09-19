@@ -29,7 +29,7 @@ export default defineConfig<WdioOptions>({
         timeout: 15000
     },
     webServer: {
-        command: 'npx ts-node support/server.ts',
+        command: 'npx tsx support/server.ts',
         url: 'http://localhost:3000/storage.html',
         reuseExistingServer: !process.env.CI,
         stdout: 'pipe',
