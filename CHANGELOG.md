@@ -10,6 +10,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [1.2.0]
+- :pencil: update dependencies (`@playwright/test` 1.63.0, `@qavajs/playwright-runner-adapter` 2.3.3, `@qavajs/playwright-wdio-fixtures` 1.3.0, `webdriverio` 9.31.9, `@types/node` 26.6.2, `typescript` 7.0.2)
+- :pencil: replace `ts-node` with `tsx` to run test e2e server
+
 ## [1.1.0]
 - :pencil: update dependencies (`@playwright/test` 1.59.1, `@qavajs/memory` 1.11.0, `@qavajs/playwright-runner-adapter` 2.3.0, `@qavajs/playwright-wdio-fixtures` 1.2.0, `webdriverio` 9.27.0, `typescript` 6.0.3)
 - :pencil: add `rootDir` to tsconfig.json
