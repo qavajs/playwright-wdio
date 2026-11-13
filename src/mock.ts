@@ -1,3 +1,4 @@
+import type { QavajsPlaywrightWdioWorld } from './QavajsPlaywrightWdioWorld';
 import { When } from '@qavajs/playwright-runner-adapter';
 import type { MemoryValue } from './types';
 
@@ -10,14 +11,14 @@ type ErrorReason = ('Failed' | 'Aborted' | 'TimedOut' | 'AccessDenied' | 'Connec
  * @example When I create mock for '/yourservice/**' as 'mock1'
  * @example When I create mock for '$mockUrlTemplate' as 'mock1'
  */
-When('I create mock for {value} as {value}', async function (urlTemplate: MemoryValue, memoryKey: MemoryValue) {
+When('I create mock for {value} as {value}', async function (this: QavajsPlaywrightWdioWorld, urlTemplate: MemoryValue, memoryKey: MemoryValue) {
     const url = await urlTemplate.value();
     memoryKey.set(await this.driver.mock(url));
 });
 
 async function respondWith(mockKey: MemoryValue, statusCode: MemoryValue, body: MemoryValue) {
     const mock = await mockKey.value() as WebdriverIO.Mock;
-    const responseStatusCode: number = parseInt(await statusCode.value());
+    const responseStatusCode: number = parseInt(await statusCode.value(), 10);
     const responseBody = await body.value();
     mock.respond(responseBody, {
         statusCode: responseStatusCode
@@ -59,7 +60,7 @@ When('I set {value} mock to respond {value} with {value}', respondWith);
  * When I create mock for '/yourservice/**' as 'myServiceMock'
  * And I set '$myServiceMock' mock to abort with 'Failed' reason
  */
-When('I set {value} mock to abort with {value} reason', async function (mockKey: MemoryValue, reason: MemoryValue) {
+When('I set {value} mock to abort with {value} reason', async function (this: QavajsPlaywrightWdioWorld, mockKey: MemoryValue, reason: MemoryValue) {
     const mock = await mockKey.value();
     const errorCode: ErrorReason = await reason.value();
     mock.abort(errorCode);
@@ -70,7 +71,7 @@ When('I set {value} mock to abort with {value} reason', async function (mockKey:
  * @param {string} mockKey - memory key to get mock instance
  * @example When I restore '$myServiceMock'
  */
-When('I restore {value} mock', async function (mockKey: MemoryValue) {
+When('I restore {value} mock', async function (this: QavajsPlaywrightWdioWorld, mockKey: MemoryValue) {
     const mock = await mockKey.value();
     await mock.restore();
 });
@@ -79,6 +80,6 @@ When('I restore {value} mock', async function (mockKey: MemoryValue) {
  * Restore all mocks
  * @example When I restore all mocks
  */
-When('I restore all mocks', async function () {
+When('I restore all mocks', async function (this: QavajsPlaywrightWdioWorld) {
     await this.driver.mockRestoreAll();
 });

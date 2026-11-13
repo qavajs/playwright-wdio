@@ -8,7 +8,7 @@ import type { APIResponse } from '@playwright/test';
  * @return {number[]} - coords array
  */
 export function parseCoords(coords: string): number[] {
-    return coords.split(/\s?,\s?/).map((c: string) => parseFloat(c ?? 0))
+    return coords.split(/\s?,\s?/).map((c: string) => parseFloat(c))
 }
 
 /**
@@ -17,7 +17,7 @@ export function parseCoords(coords: string): number[] {
  * @return {{x: number, y: number}} - coords object
  */
 export function parseCoordsAsObject(coords: string): { x: number, y: number } {
-    const [x, y] = coords.split(/\s?,\s?/).map((c: string) => parseFloat(c ?? 0));
+    const [x, y] = parseCoords(coords);
     return {x, y}
 }
 
@@ -74,7 +74,7 @@ function getKey(key: string) {
 }
 
 export function parseKeySequence(sequence: string | string[]): string[] {
-    // @ts-ignore
+    // @ts-expect-error
     if (sequence in Keys) return [Keys[sequence]];
     if (Array.isArray(sequence)) return sequence;
     if (MODIFIER_KEYS.some(key => sequence.includes(key))) return sequence.split('+').map(getKey);
@@ -146,7 +146,7 @@ export function dragAndDrop(source: Element, target: Element) {
                 {
                     clientX: sourceCoordinates.left,
                     clientY: sourceCoordinates.top,
-                    // @ts-ignore
+                    // @ts-expect-error
                     dataTransfer: new CustomDataTransfer()
                 }
             );
@@ -164,7 +164,6 @@ export function dragAndDrop(source: Element, target: Element) {
                 {
                     clientX: targetCoordinates.left,
                     clientY: targetCoordinates.top,
-                    // @ts-ignore
                     dataTransfer: dragStartEvent.dataTransfer
                 }
             );
@@ -174,7 +173,6 @@ export function dragAndDrop(source: Element, target: Element) {
                 {
                     clientX: targetCoordinates.left,
                     clientY: targetCoordinates.top,
-                    // @ts-ignore
                     dataTransfer: dragStartEvent.dataTransfer
                 }
             );
@@ -184,7 +182,6 @@ export function dragAndDrop(source: Element, target: Element) {
                 {
                     clientX: targetCoordinates.left,
                     clientY: targetCoordinates.top,
-                    // @ts-ignore
                     dataTransfer: dragStartEvent.dataTransfer
                 }
             );
@@ -194,7 +191,6 @@ export function dragAndDrop(source: Element, target: Element) {
                 {
                     clientX: targetCoordinates.left,
                     clientY: targetCoordinates.top,
-                    // @ts-ignore
                     dataTransfer: dragStartEvent.dataTransfer
                 }
             );
@@ -215,14 +211,14 @@ export function dragAndDrop(source: Element, target: Element) {
 
             event.view = window;
             event.detail = 0;
-            event.ctlrKey = false;
+            event.ctrlKey = false;
             event.altKey = false;
             event.shiftKey = false;
             event.metaKey = false;
             event.button = 0;
             event.relatedTarget = null;
 
-            if (options.clientX && options.clientY) {
+            if (options.clientX !== undefined && options.clientY !== undefined) {
                 event.screenX = window.screenX + options.clientX;
                 event.screenY = window.screenY + options.clientY;
             }
@@ -297,9 +293,10 @@ export enum Keys {
 }
 
 /**
- * Class represents virtual mouse pointer to support actions
+ * Class represents virtual mouse pointer to support actions.
+ * One instance lives on each World, so pointer state does not carry over between scenarios.
  */
-class VirtualPointer {
+export class VirtualPointer {
     origin: WebdriverIO.Element | 'viewport' = 'viewport';
     x: number = 0;
     y: number = 0;
@@ -329,5 +326,3 @@ class VirtualPointer {
         }
     }
 }
-
-export const virtualPointer = new VirtualPointer();

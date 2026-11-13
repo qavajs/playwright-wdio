@@ -17,7 +17,7 @@ export default defineConfig<WdioOptions>({
     /* Fail the build on CI if you accidentally left test.only in the source code. */
     forbidOnly: !!process.env.CI,
     /* Retry on CI only */
-    retries: 1,
+    retries: process.env.CI ? 0 : 1, // CI must not hide flaky tests
     /* Opt out of parallel tests on CI. */
     workers: process.env.CI ? 1 : undefined,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -54,6 +54,22 @@ export default defineConfig<WdioOptions>({
                     logLevel: 'error',
                     capabilities: {
                         browserName: 'chrome',
+                        "goog:chromeOptions": {
+                            args: ['headless=new']
+                        }
+                    },
+                }
+            }
+        },
+        {
+            // frame and window steps take a different path in WebDriver Classic sessions
+            name: 'e2e-classic',
+            use: {
+                wdioLaunchOptions: {
+                    logLevel: 'error',
+                    capabilities: {
+                        browserName: 'chrome',
+                        'wdio:enforceWebDriverClassic': true,
                         "goog:chromeOptions": {
                             args: ['headless=new']
                         }

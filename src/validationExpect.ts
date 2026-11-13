@@ -1,10 +1,13 @@
 import { expect as base, test } from '@qavajs/playwright-wdio-fixtures';
+// TODO: import from the package root once @qavajs/playwright-wdio-fixtures exports `withoutSteps` there;
+// `lib/steps` is an internal path and may move without a major release
 import { withoutSteps } from '@qavajs/playwright-wdio-fixtures/lib/steps';
 import { sleep } from './utils';
 
 export const expect = base.extend({
     toSimpleEqual(actual: any, expected: any) {
         const name = 'to equal';
+        // biome-ignore lint/suspicious/noDoubleEquals: `equal` validation is loose equality by design
         const pass = actual == expected;
         return {
             expected,
@@ -15,7 +18,7 @@ export const expect = base.extend({
         };
     },
     toHaveType(actual: any, expected: string) {
-        const pass = typeof actual == expected;
+        const pass = typeof actual === expected;
         return {
             message: () => `expected ${actual} ${pass ? 'not ': ''}to have type ${this.utils.printReceived(expected)}`,
             pass
@@ -167,8 +170,9 @@ const strictlyEqual: Validator = {
 const validators: Record<string, Validator> = {
     [validations.EQUAL]: {
         assert: ({ expected, actual, reverse, soft, message }) =>
-            // @ts-ignore
+            // @ts-expect-error
             expectValue({ expected, reverse, soft, message: message ?? 'expect.toEqual' }).toSimpleEqual(actual),
+        // biome-ignore lint/suspicious/noDoubleEquals: `equal` validation is loose equality by design
         pass: (actual, expectation) => actual == expectation
     },
     [validations.STRICTLY_EQUAL]: strictlyEqual,
@@ -190,9 +194,9 @@ const validators: Record<string, Validator> = {
     [validations.LESS]: below,
     [validations.HAVE_TYPE]: {
         assert: ({ expected, actual, reverse, soft, message }) =>
-            // @ts-ignore
+            // @ts-expect-error
             expectValue({ expected, reverse, soft, message }).toHaveType(actual),
-        pass: (actual, expectation) => typeof actual == expectation
+        pass: (actual, expectation) => typeof actual === expectation
     },
     [validations.CASE_INSENSITIVE_EQUAL]: {
         assert: ({ expected, actual, reverse, soft, message }) =>
@@ -202,7 +206,7 @@ const validators: Record<string, Validator> = {
     },
     [validations.SATISFY]: {
         assert: ({ expected, actual, reverse, soft, message }) =>
-            // @ts-ignore
+            // @ts-expect-error
             expectValue({ expected, reverse, soft, message }).toSatisfy(actual),
         pass: (actual, expectation) => Boolean(expectation(actual))
     },

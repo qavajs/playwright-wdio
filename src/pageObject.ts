@@ -1,10 +1,11 @@
 import type { ChainablePromiseArray, ChainablePromiseElement } from 'webdriverio';
 
+type ComponentConstructor = new () => object;
 type SelectorDefinition = string | ((argument: string) => string) | ((argument: any) => any) | null;
 
 class Selector {
     selector: SelectorDefinition;
-    component!: Function;
+    component!: ComponentConstructor;
     type: string = 'simple';
 
     constructor(selector: SelectorDefinition, type?: string) {
@@ -16,9 +17,9 @@ class Selector {
 
     /**
      * Define current locator as component
-     * @param { new () => void } component
+     * @param { ComponentConstructor } component
      */
-    as(component: new () => void) {
+    as(component: ComponentConstructor) {
         this.component = component;
         return this;
     }
@@ -51,9 +52,9 @@ export interface LocatorDefinition {
 
     /**
      * Define component
-     * @param { new () => void } component
+     * @param { ComponentConstructor } component
      */
-    as: (component: new () => void) => Selector;
+    as: (component: ComponentConstructor) => Selector;
 }
 
 export const locator: LocatorDefinition = function locator(selector: any): Selector {
@@ -68,7 +69,7 @@ locator.native = function(selector: (params: NativeSelectorParams) => ChainableP
     return new Selector(selector, 'native');
 }
 
-locator.as = function (component: new () => void) {
+locator.as = function (component: ComponentConstructor) {
     const selector = new Selector(null);
     selector.component = component;
     return selector;
@@ -126,9 +127,7 @@ export interface Locator {
 }
 
 export function element(this: any, path: string): Locator {
-    const chain = query(this.config.pageObject, path);
-    const driver = this.driver as WebdriverIO.Browser;
-    const logger = this;
+    const chain = query(this.pageObject ?? this.config.pageObject, path);
     const logItem = (item: ChainItem) => `.$('${item.type === 'template' ? item.selector(item.argument) : item.selector}')`;
     const logged = new Set<string>();
     // Polling validations re-invoke the getter on every attempt - log a resolved chain once,
@@ -137,57 +136,36 @@ export function element(this: any, path: string): Locator {
         const message = `${path} -> ${logChain.replace(/^\./, '')}`;
         if (logged.has(message)) return;
         logged.add(message);
-        logger.log(message);
+        this.log(message);
     };
-    const getter: Locator = function () {
-        let current = driver as unknown as ChainablePromiseElement;
-        let logChain = '';
-        for (const item of chain) {
-            logChain += logItem(item);
-            switch (item.type) {
-                case 'simple': current = item.selector ? current.$(item.selector) : current; break;
-                case 'template': current = current.$(item.selector(item.argument)); break;
-                case 'native': current = item.selector({
-                    browser: driver,
-                    driver,
-                    parent: current,
-                    argument: item.argument
-                }); break;
-            }
-        }
-        log(logChain);
-        return current
-    }
-    getter.collection = function () {
-        let current = driver as unknown as ChainablePromiseElement;
-        let logChain = '';
+    /** Resolves the chain; with `all` the last item is resolved as a collection. */
+    const resolve = (all: boolean): any => {
+        // read at resolution time: the selected frame/tab may change after the locator is created
+        const driver = this.driver as WebdriverIO.Browser;
+        let current: any = this.target ?? driver;
         for (let i = 0; i < chain.length; i++) {
-            const item = chain[i];
-            logChain += logItem(item);
-            if (i === chain.length - 1) {
-                log(logChain);
-                switch (item.type) {
-                    case 'simple': return current.$$(item.selector);
-                    case 'template': return current.$$(item.selector(item.argument));
-                    case 'native': return item.selector({
-                        browser: driver,
-                        driver,
-                        parent: current,
-                        argument: item.argument
-                    });
-                }
-            }
-            switch (item.type) {
-                case 'simple': current = item.selector ? current.$(item.selector) : current; break;
-                case 'template': current = current.$(item.selector(item.argument)); break;
-                case 'native': current = item.selector({
-                    browser: driver,
-                    driver,
-                    parent: current,
-                    argument: item.argument
-                }); break;
-            }
+            current = resolveItem(chain[i], current, driver, all && i === chain.length - 1);
         }
-    }
+        log(chain.map(logItem).join(''));
+        return current;
+    };
+    const getter = (() => resolve(false)) as Locator;
+    getter.collection = () => resolve(true);
     return getter;
+}
+
+function resolveItem(item: ChainItem, parent: any, driver: WebdriverIO.Browser, all: boolean): any {
+    switch (item.type) {
+        case 'simple':
+            if (all) return parent.$$(item.selector);
+            return item.selector ? parent.$(item.selector) : parent;
+        case 'template': {
+            const selector = item.selector(item.argument);
+            return all ? parent.$$(selector) : parent.$(selector);
+        }
+        case 'native':
+            return item.selector({ browser: driver, driver, parent, argument: item.argument });
+        default:
+            throw new Error(`Unknown selector type '${item.type}' of '${item.alias}'`);
+    }
 }

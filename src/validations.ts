@@ -3,6 +3,7 @@ import type { QavajsPlaywrightWdioWorld } from './QavajsPlaywrightWdioWorld';
 import { dataTable2Array } from './utils';
 import type { MemoryValue, StateValidation, Validation } from './types';
 import type { Locator } from './pageObject';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 /**
  * Verify element condition
@@ -12,7 +13,7 @@ import type { Locator } from './pageObject';
  * @example I expect 'Loading' not to be present
  * @example I expect 'Search Bar > Submit Button' to be clickable
  */
-Then('I expect {locator} {state}', async function (element: Locator, condition: StateValidation) {
+Then('I expect {locator} {state}', async function (this: QavajsPlaywrightWdioWorld, element: Locator, condition: StateValidation) {
     await condition(element());
 });
 
@@ -26,7 +27,7 @@ Then('I expect {locator} {state}', async function (element: Locator, condition: 
  */
 Then(
     'I expect text of {locator} {validation} {value}',
-    async function (element: Locator, validation: Validation, expected: MemoryValue) {
+    async function (this: QavajsPlaywrightWdioWorld, element: Locator, validation: Validation, expected: MemoryValue) {
         const expectedValue = await expected.value();
         const elementText = () => element().getText();
         await validation.poll(elementText, expectedValue);
@@ -44,7 +45,7 @@ Then(
  */
 Then(
     'I expect number of elements in {locator} collection {validation} {value}',
-    async function (locator: Locator, validation: Validation, expected: MemoryValue) {
+    async function (this: QavajsPlaywrightWdioWorld, locator: Locator, validation: Validation, expected: MemoryValue) {
         const collectionLength = () => locator.collection().length;
         const expectedValue = await expected.value();
         await validation.poll(collectionLength, expectedValue);
@@ -61,7 +62,7 @@ Then(
  */
 Then(
     'I expect value of {locator} {validation} {value}',
-    async function (element: Locator, validation: Validation, expected: MemoryValue) {
+    async function (this: QavajsPlaywrightWdioWorld, element: Locator, validation: Validation, expected: MemoryValue) {
         const actualValue = () => element().getValue();
         const expectedValue = await expected.value();
         await validation.poll(actualValue, expectedValue);
@@ -79,7 +80,7 @@ Then(
  */
 Then(
     'I expect {value} property of {locator} {validation} {value}',
-    async function (property: MemoryValue, element: Locator, validation: Validation, expected: MemoryValue) {
+    async function (this: QavajsPlaywrightWdioWorld, property: MemoryValue, element: Locator, validation: Validation, expected: MemoryValue) {
         const propertyName = await property.value();
         const expectedValue = await expected.value();
         const actualValue = () => element().getProperty(propertyName);
@@ -97,7 +98,7 @@ Then(
  */
 Then(
     'I expect {value} attribute of {locator} {validation} {value}',
-    async function (attribute: MemoryValue, element: Locator, validation: Validation, expected: MemoryValue) {
+    async function (this: QavajsPlaywrightWdioWorld, attribute: MemoryValue, element: Locator, validation: Validation, expected: MemoryValue) {
         const attributeName = await attribute.value();
         const expectedValue = await expected.value();
         const actualValue = () => element().getAttribute(attributeName);
@@ -114,9 +115,9 @@ Then(
  */
 Then(
     'I expect current url {validation} {value}',
-    async function (validation: Validation, expected: MemoryValue) {
+    async function (this: QavajsPlaywrightWdioWorld, validation: Validation, expected: MemoryValue) {
         const expectedUrl = await expected.value();
-        const actualUrl = () => this.driver.getUrl();
+        const actualUrl = () => this.tab.getUrl();
         await validation.poll(actualUrl, expectedUrl);
     }
 );
@@ -129,9 +130,9 @@ Then(
  */
 Then(
     'I expect page title {validation} {value}',
-    async function (validation: Validation, expected: MemoryValue) {
+    async function (this: QavajsPlaywrightWdioWorld, validation: Validation, expected: MemoryValue) {
         const expectedTitle = await expected.value();
-        const actualTitle = () => this.driver.getTitle();
+        const actualTitle = () => this.tab.getTitle();
         await validation.poll(actualTitle, expectedTitle);
     }
 );
@@ -146,7 +147,7 @@ Then(
  */
 Then(
     'I expect text of every element in {locator} collection {validation} {value}',
-    async function (locator: Locator, validation: Validation, expected: MemoryValue) {
+    async function (this: QavajsPlaywrightWdioWorld, locator: Locator, validation: Validation, expected: MemoryValue) {
         const expectedValue = await expected.value();
         const collection = await locator.collection().getElements();
         for (const element of collection) {
@@ -162,10 +163,9 @@ Then(
  * @example I expect every element in 'Header > Links' collection to be visible
  * @example I expect every element in 'Loading Bars' collection not to be present
  */
-Then('I expect every element in {locator} collection {state}', async function (locator: Locator, condition: Function) {
-    const collection = locator.collection();
-    const conditionWait = (element: WebdriverIO.Element) => condition(element, this.config.browser.timeout.page);
-    await Promise.all(await collection.map(conditionWait))
+Then('I expect every element in {locator} collection {state}', async function (this: QavajsPlaywrightWdioWorld, locator: Locator, condition: StateValidation) {
+    const elements = await locator.collection().getElements();
+    await Promise.all([...elements].map(element => condition(element as unknown as ChainablePromiseElement)));
 });
 
 /**
@@ -177,7 +177,7 @@ Then('I expect every element in {locator} collection {state}', async function (l
  */
 Then(
     'I expect {value} attribute of every element in {locator} collection {validation} {value}',
-    async function (attribute: MemoryValue, locator: Locator, validation: Validation, expected: MemoryValue) {
+    async function (this: QavajsPlaywrightWdioWorld, attribute: MemoryValue, locator: Locator, validation: Validation, expected: MemoryValue) {
         const expectedValue = await expected.value();
         const attributeName = await attribute.value();
         const collection = await locator.collection().getElements();
@@ -197,7 +197,7 @@ Then(
  */
 Then(
     'I expect {value} property of every element in {locator} collection {validation} {value}',
-    async function (property: MemoryValue, locator: Locator, validation: Validation, expected: MemoryValue) {
+    async function (this: QavajsPlaywrightWdioWorld, property: MemoryValue, locator: Locator, validation: Validation, expected: MemoryValue) {
         const expectedValue = await expected.value();
         const propertyName = await property.value();
         const collection = await locator.collection().getElements();
@@ -219,10 +219,10 @@ Then(
  */
 Then(
     'I expect {value} css property of {locator} {validation} {value}',
-    async function (property: MemoryValue, locator: Locator, validation: Validation, expected: MemoryValue) {
+    async function (this: QavajsPlaywrightWdioWorld, property: MemoryValue, locator: Locator, validation: Validation, expected: MemoryValue) {
         const propertyName = await property.value();
         const expectedValue = await expected.value();
-        const actualValue = async () => this.driver.execute(function (element: HTMLElement, propertyName: string) {
+        const actualValue = async () => this.target.execute<string, [WebdriverIO.Element, string]>(function (element, propertyName) {
             return getComputedStyle(element).getPropertyValue(propertyName)
         }, await locator().getElement(), propertyName);
         await validation.poll(actualValue, expectedValue);
@@ -240,12 +240,12 @@ Then(
  */
 Then(
     'I expect {value} css property of every element in {locator} collection {validation} {value}',
-    async function (property: MemoryValue, locator: Locator, validation: Validation, expected: MemoryValue) {
+    async function (this: QavajsPlaywrightWdioWorld, property: MemoryValue, locator: Locator, validation: Validation, expected: MemoryValue) {
         const propertyName = await property.value();
         const expectedValue = await expected.value();
         const collection = await locator.collection().getElements();
         for (const element of collection) {
-            const actualValue = async () => this.driver.execute(function (element: HTMLElement, propertyName: string) {
+            const actualValue = async () => this.target.execute<string, [WebdriverIO.Element, string]>(function (element, propertyName) {
                 return getComputedStyle(element).getPropertyValue(propertyName)
             }, element, propertyName);
             await validation.poll(actualValue, expectedValue);
@@ -265,7 +265,7 @@ Then(
  */
 Then(
     'I expect {value} {validation} {value}',
-    async function (value1: MemoryValue, expect: Validation, value2: MemoryValue) {
+    async function (this: QavajsPlaywrightWdioWorld, value1: MemoryValue, expect: Validation, value2: MemoryValue) {
         expect(await value1.value(), await value2.value());
     });
 
@@ -279,7 +279,7 @@ Then(
  */
 Then(
     'I expect at least {int} element(s) in {value} array {validation} {value}',
-    async function (expectedNumber: number, arr: MemoryValue, expect: Validation, expected: MemoryValue) {
+    async function (this: QavajsPlaywrightWdioWorld, expectedNumber: number, arr: MemoryValue, expect: Validation, expected: MemoryValue) {
         const array: Array<any> = await arr.value();
         const expectedValue: any = await expected.value();
         const failCounter = { fail: 0, pass: 0 };
@@ -287,7 +287,7 @@ Then(
             try {
                 expect(value, expectedValue);
                 failCounter.pass++;
-            } catch (err) {
+            } catch (_err) {
                 failCounter.fail++;
             }
         }
@@ -307,7 +307,7 @@ Then(
  */
 Then(
     'I expect every element in {value} array {validation} {value}',
-    async function (arr: MemoryValue, expect: Validation, expected: MemoryValue) {
+    async function (this: QavajsPlaywrightWdioWorld, arr: MemoryValue, expect: Validation, expected: MemoryValue) {
         const array: Array<any> = await arr.value();
         const expectedValue: any = await expected.value();
         for (const value of array) {
@@ -350,7 +350,7 @@ Then(
  */
 Then(
     'I expect {value} array {validation}:',
-    async function (arr: MemoryValue, expect: Validation, members: DataTable) {
+    async function (this: QavajsPlaywrightWdioWorld, arr: MemoryValue, expect: Validation, members: DataTable) {
         const array = await arr.value();
         const membersArray = await Promise.all(
             members.raw().map(memberKey => this.value(memberKey.pop() as string))
@@ -382,10 +382,10 @@ function validateAnyOf(AR: any, ERs: any[], validation: (AR: any, ER: any) => vo
  */
 Then(
     'I expect {value} {validation} at least one of {value}',
-    async function (actual: MemoryValue, expect: Validation, expected: MemoryValue) {
+    async function (this: QavajsPlaywrightWdioWorld, actual: MemoryValue, expect: Validation, expected: MemoryValue) {
         const actualValue = await actual.value();
         const expectedValues = await expected.value();
-        if (!(expectedValues instanceof Array)) throw new Error(`'${expected.expression}' parameter is not an array`);
+        if (!(Array.isArray(expectedValues))) throw new Error(`'${expected.expression}' parameter is not an array`);
         validateAnyOf(actualValue, expectedValues, expect);
     }
 );
@@ -433,10 +433,10 @@ function validateAllOf(AR: any, ERs: any[], validation: (AR: any, ER: any) => vo
  */
 Then(
     'I expect {value} {validation} all of {value}',
-    async function (actual: MemoryValue, expect: Validation, expected: MemoryValue) {
+    async function (this: QavajsPlaywrightWdioWorld, actual: MemoryValue, expect: Validation, expected: MemoryValue) {
         const actualValue = await actual.value();
         const expectedValues = await expected.value();
-        if (!(expectedValues instanceof Array)) throw new Error(`'${expected.expression}' parameter is not an array`);
+        if (!(Array.isArray(expectedValues))) throw new Error(`'${expected.expression}' parameter is not an array`);
         validateAllOf(actualValue, expectedValues, expect);
     }
 );

@@ -6,6 +6,9 @@ on:
       - main
       - v1
       - v2
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -17,15 +20,18 @@ jobs:
         version: [ 22, 24, 26 ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.version }}
+          cache: npm
       - run: npm ci
+      - run: npm run lint
       - run: npm run build
+      - run: npm test
       - run: npm run test:e2e
       - name: junit report
-        uses: mikepenz/action-junit-report@v4
+        uses: mikepenz/action-junit-report@v5
         if: always()
         with:
           report_paths: './test-e2e/report/report.xml'

@@ -64,6 +64,13 @@ defineParameterType({
 });
 
 defineParameterType({
+    name: 'storageType',
+    regexp: /(local|session)/,
+    transformer: p => p,
+    useForSnippets: false
+});
+
+defineParameterType({
     name: 'browserButton',
     regexp: /(back|forward)/,
     transformer: p => p,
