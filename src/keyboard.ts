@@ -1,3 +1,4 @@
+import type { QavajsPlaywrightWdioWorld } from './QavajsPlaywrightWdioWorld';
 import { When } from '@qavajs/playwright-runner-adapter';
 import { parseKeySequence } from './utils';
 
@@ -6,9 +7,9 @@ import { parseKeySequence } from './utils';
  * @param {string} key - key to press
  * @example When I hold down 'Q' key
  */
-When('I hold down {string} key', async function (key) {
+When('I hold down {string} key', async function (this: QavajsPlaywrightWdioWorld, key) {
     const [keyToPress] = parseKeySequence(key);
-    await this.driver.action('key').down(keyToPress).perform(true);
+    await this.target.action('key').down(keyToPress).perform(true);
 });
 
 /**
@@ -16,7 +17,7 @@ When('I hold down {string} key', async function (key) {
  * @param {string} key - key to release
  * @example When I release 'A' key
  */
-When('I release {string} key', async function (key) {
+When('I release {string} key', async function (this: QavajsPlaywrightWdioWorld, key) {
     const [keyToPress] = parseKeySequence(key);
-    await this.driver.action('key').up(keyToPress).perform();
+    await this.target.action('key').up(keyToPress).perform();
 });

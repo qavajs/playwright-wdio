@@ -1,9 +1,13 @@
+import type { QavajsPlaywrightWdioWorld } from './QavajsPlaywrightWdioWorld';
 import { When } from '@qavajs/playwright-runner-adapter';
 import type { Locator } from './pageObject';
 import type { MemoryValue } from './types';
 
-function resolveFunction(script: string | Function) {
-    return typeof script === 'function' ? script : new Function(script);
+type ClientFunction = (...args: any[]) => any;
+
+/** A string script becomes a function body, so it needs an explicit `return` to produce a result */
+function resolveFunction(script: string | ClientFunction): ClientFunction {
+    return typeof script === 'function' ? script : new Function(script) as ClientFunction;
 }
 /**
  * Execute client function
@@ -11,9 +15,9 @@ function resolveFunction(script: string | Function) {
  * @example I execute '$fn' function // fn is function reference
  * @example I execute 'window.scrollBy(0, 100)' function
  */
-When('I execute {value} function/script', async function (functionKey: MemoryValue) {
+When('I execute {value} function/script', async function (this: QavajsPlaywrightWdioWorld, functionKey: MemoryValue) {
     const fn = resolveFunction(await functionKey.value());
-    await this.driver.execute(fn);
+    await this.target.execute(fn);
 });
 
 /**
@@ -21,11 +25,11 @@ When('I execute {value} function/script', async function (functionKey: MemoryVal
  * @param {string} functionKey - memory key of function
  * @param {string} memoryKey - memory key to store result
  * @example I execute '$fn' function and save result as 'result' // fn is function reference
- * @example I execute 'window.scrollY' function and save result as 'scroll'
+ * @example I execute 'return window.scrollY' function and save result as 'scroll'
  */
-When('I execute {value} function/script and save result as {value}', async function (functionKey: MemoryValue, memoryKey: MemoryValue) {
+When('I execute {value} function/script and save result as {value}', async function (this: QavajsPlaywrightWdioWorld, functionKey: MemoryValue, memoryKey: MemoryValue) {
     const fn = resolveFunction(await functionKey.value());
-    memoryKey.set(await this.driver.execute(fn));
+    memoryKey.set(await this.target.execute(fn));
 });
 
 /**
@@ -35,10 +39,10 @@ When('I execute {value} function/script and save result as {value}', async funct
  * @example I execute '$fn' function on 'Component > Element' // fn is function reference
  * @example I execute 'arguments[0].scrollIntoView()' function on 'Component > Element'
  */
-When('I execute {value} function/script on {locator}', async function (functionKey: MemoryValue, locator: Locator) {
+When('I execute {value} function/script on {locator}', async function (this: QavajsPlaywrightWdioWorld, functionKey: MemoryValue, locator: Locator) {
     const fn = resolveFunction(await functionKey.value());
     const element = locator();
-    await this.driver.execute(fn, await element.getElement());
+    await this.target.execute(fn, await element.getElement());
 });
 
 /**
@@ -50,9 +54,9 @@ When('I execute {value} function/script on {locator}', async function (functionK
  */
 When(
     'I execute {value} function/script on {locator} and save result as {value}',
-    async function (functionKey: MemoryValue, locator: Locator, memoryKey: MemoryValue) {
+    async function (this: QavajsPlaywrightWdioWorld, functionKey: MemoryValue, locator: Locator, memoryKey: MemoryValue) {
         const fn = resolveFunction(await functionKey.value());
         const element = locator();
-        memoryKey.set(await this.driver.execute(fn, await element.getElement()));
+        memoryKey.set(await this.target.execute(fn, await element.getElement()));
     }
 );

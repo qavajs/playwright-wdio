@@ -1,3 +1,4 @@
+import type { QavajsPlaywrightWdioWorld } from './QavajsPlaywrightWdioWorld';
 import { access, constants, readdir, readFile } from 'node:fs/promises';
 import { When } from '@qavajs/playwright-runner-adapter';
 import type { MemoryValue } from './types';
@@ -10,7 +11,7 @@ import type { MemoryValue } from './types';
  * When I save './folder/file.txt' file content as 'fileContent'
  * When I save '$filePath' file content as 'fileContent'
  */
-When('I save {value} file content as {value}', async function (file: MemoryValue, memoryKey: MemoryValue) {
+When('I save {value} file content as {value}', async function (this: QavajsPlaywrightWdioWorld, file: MemoryValue, memoryKey: MemoryValue) {
     const filePath = await file.value();
     const fileContent = await readFile(filePath);
     memoryKey.set(fileContent);
@@ -24,7 +25,7 @@ When('I save {value} file content as {value}', async function (file: MemoryValue
  * When I save './folder/file.txt' text file content as 'fileContent'
  * When I save '$filePath' text file as 'fileContent'
  */
-When('I save {value} text file content as {value}', async function (file: MemoryValue, memoryKey: MemoryValue) {
+When('I save {value} text file content as {value}', async function (this: QavajsPlaywrightWdioWorld, file: MemoryValue, memoryKey: MemoryValue) {
     const filePath = await file.value();
     const fileContent = await readFile(filePath, 'utf-8');
     memoryKey.set(fileContent);
@@ -39,7 +40,7 @@ When('I save {value} text file content as {value}', async function (file: Memory
  * When I expect './folder/file.txt' text file content to be equal 'file content'
  * When I expect '$filePath' text file content to contain '$content'
  */
-When('I expect {value} text file content {validation} {value}', async function (file: MemoryValue, validation, expectedValue: MemoryValue) {
+When('I expect {value} text file content {validation} {value}', async function (this: QavajsPlaywrightWdioWorld, file: MemoryValue, validation, expectedValue: MemoryValue) {
     const fileName = await file.value();
     const expected = await expectedValue.value();
     const fileContent = await readFile(fileName, 'utf-8');
@@ -54,7 +55,7 @@ When('I expect {value} text file content {validation} {value}', async function (
  * When I expect file matching 'f.+\.txt' regexp exists in './test-e2e/folder'
  * When I expect file matching '$fileRegexp' regexp exists in '$folder'
  */
-When('I expect file matching {value} regexp exists in {value}', async function (file: MemoryValue, dir: MemoryValue) {
+When('I expect file matching {value} regexp exists in {value}', async function (this: QavajsPlaywrightWdioWorld, file: MemoryValue, dir: MemoryValue) {
     const fileNameRegexp = new RegExp(await file.value());
     const dirName = await dir.value();
     await this.expect.poll(async () => {
@@ -73,7 +74,7 @@ When('I expect file matching {value} regexp exists in {value}', async function (
  * When I expect './test-e2e/folder/file.txt' file exists
  * When I expect '$filePath' file exists
  */
-When('I expect {value} file exists', async function (file: MemoryValue) {
+When('I expect {value} file exists', async function (this: QavajsPlaywrightWdioWorld, file: MemoryValue) {
     const fileName = await file.value();
     await this.expect.poll(async () => {
         try {

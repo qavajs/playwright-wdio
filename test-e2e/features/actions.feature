@@ -56,6 +56,21 @@ Feature: actions
     When I expect 'Button' to be visible
     When I expect 'Frame Element' not to be visible
 
+  Scenario: switch to nested frames by alias
+    When I switch to 'IFrame' frame
+    And I switch to 'Inner IFrame' frame
+    Then I expect text of 'Inner Frame Element' to be equal 'Inner Frame Element'
+    When I execute 'return document.querySelector("#innerFrameElement").innerText' function and save result as 'innerText'
+    Then I expect '$innerText' to be equal 'Inner Frame Element'
+    And I expect current url to contain 'actions.html'
+    When I switch to parent frame
+    Then I expect 'Button' to be visible
+
+  Scenario: navigation leaves frame
+    When I switch to 1 frame
+    And I open '$actionsPage' url
+    Then I expect 'Button' to be visible
+
   Scenario: switch to tab by index
     When I click 'New Tab Link'
     When I switch to 2 window

@@ -1,8 +1,10 @@
+import type { ChainablePromiseElement } from 'webdriverio';
 import { When } from '@qavajs/playwright-runner-adapter';
 import type { QavajsPlaywrightWdioWorld } from './QavajsPlaywrightWdioWorld';
 import { parseCoords, parseCoordsAsObject, parseKeySequence, dragAndDrop } from './utils';
 import type { MemoryValue } from './types';
 import type { Locator } from './pageObject';
+import { findWindow, resetToTab, switchToFrame, switchToTopFrame, switchToWindow } from './browsingContext';
 
 /**
  * Opens provided url
@@ -10,7 +12,13 @@ import type { Locator } from './pageObject';
  * @example I open 'https://google.com'
  */
 When('I open {value} url', async function (this: QavajsPlaywrightWdioWorld, url: MemoryValue) {
-    await this.driver.url(await url.value());
+    const path = await url.value();
+    resetToTab(this);
+    if (this.browsingContext) {
+        await this.browsingContext.navigate(path);
+    } else {
+        await this.driver.url(path);
+    }
 });
 
 /**
@@ -33,13 +41,12 @@ When('I type {value} (in)to {locator}', async function (this: QavajsPlaywrightWd
  */
 When('I type {value} chars (in)to {locator}', async function (this: QavajsPlaywrightWdioWorld, typeValue: MemoryValue, element: Locator) {
     await element().click();
-    await this.driver.keys(await typeValue.value());
+    await this.keys(await typeValue.value());
 });
 
 /**
  * Click element
  * @param {string} alias - element to click
- * @param {boolean} [disableWait] - disable wait before click
  * @example I click 'Google Button'
  */
 When('I click {locator}', async function (this: QavajsPlaywrightWdioWorld, element: Locator) {
@@ -49,7 +56,6 @@ When('I click {locator}', async function (this: QavajsPlaywrightWdioWorld, eleme
 /**
  * Double click element
  * @param {string} alias - double element to click
- * @param {boolean} [disableWait] - disable wait before click
  * @example I double click 'Google Button'
  */
 When('I double click {locator}', async function (this: QavajsPlaywrightWdioWorld, element: Locator) {
@@ -59,7 +65,6 @@ When('I double click {locator}', async function (this: QavajsPlaywrightWdioWorld
 /**
  * Right click element
  * @param {string} alias - element to right-click
- * @param {boolean} [disableWait] - disable wait before click
  * @example I right click 'Google Button'
  */
 When('I right click {locator}', async function (this: QavajsPlaywrightWdioWorld, element: Locator) {
@@ -72,7 +77,7 @@ When('I right click {locator}', async function (this: QavajsPlaywrightWdioWorld,
  * @example I force click 'Google Button'
  */
 When('I force click {locator}', async function (this: QavajsPlaywrightWdioWorld, element: Locator) {
-    await this.driver.execute((e: HTMLElement) => e.click(), await element().getElement());
+    await this.target.execute((e: HTMLElement) => e.click(), await element().getElement());
 });
 
 /**
@@ -97,7 +102,7 @@ When(
         const expectedText = await value.value();
         for (const element of await collection.getElements()) {
             const text = await element.getText();
-            if (text === await expectedText) {
+            if (text === expectedText) {
                 return element.click();
             }
         }
@@ -105,11 +110,11 @@ When(
     });
 
 /**
- * Switch to parent frame
+ * Switch to the top-level document of the current tab
  * @example I switch to parent frame
  */
-When('I switch to parent frame', async function (this: QavajsPlaywrightWdioWorld, ) {
-    await this.driver.switchFrame(null);
+When('I switch to parent frame', async function (this: QavajsPlaywrightWdioWorld) {
+    await switchToTopFrame(this);
 });
 
 /**
@@ -118,8 +123,15 @@ When('I switch to parent frame', async function (this: QavajsPlaywrightWdioWorld
  * @example I switch to 2 frame
  */
 When('I switch to {int} frame', async function (this: QavajsPlaywrightWdioWorld, index: number) {
-    const frame = this.driver.$$('iframe, frame')[index - 1];
-    await this.driver.switchFrame(frame);
+    let frames: WebdriverIO.Element[] = [];
+    await this.driver.waitUntil(
+        async () => {
+            frames = [...await this.target.$$('iframe, frame').getElements()];
+            return frames.length >= index;
+        },
+        { timeout: this.config.timeout, timeoutMsg: `Frame ${index} was not found` }
+    );
+    await switchToFrame(this, frames[index - 1] as unknown as ChainablePromiseElement);
 });
 
 /**
@@ -128,7 +140,7 @@ When('I switch to {int} frame', async function (this: QavajsPlaywrightWdioWorld,
  * @example I switch to 'Checkout Iframe' frame
  */
 When('I switch to {locator} frame', async function (this: QavajsPlaywrightWdioWorld, element: Locator) {
-    await this.driver.switchFrame(element());
+    await switchToFrame(this, element());
 });
 
 /**
@@ -139,27 +151,24 @@ When('I switch to {locator} frame', async function (this: QavajsPlaywrightWdioWo
 When('I switch to {int} window', async function (this: QavajsPlaywrightWdioWorld, index: number) {
     await this.driver.waitUntil(
         async () => (await this.driver.getWindowHandles()).length >= index,
-        { timeout: this.config.timeout }
+        { timeout: this.config.timeout, timeoutMsg: `Window ${index} was not found` }
     );
     const windowHandles = await this.driver.getWindowHandles();
-    await this.driver.switchToWindow(windowHandles[index - 1]);
+    await switchToWindow(this, windowHandles[index - 1]);
 });
 
 /**
  * Switch to window by text
- * @param {string} matcher - window matcher (url or title)
+ * @param {string} matcher - window matcher (handle, or part of url, title or window name)
  * @example I switch to 'google.com' window
  */
 When('I switch to {value} window', async function (this: QavajsPlaywrightWdioWorld, matcher: MemoryValue) {
-    const urlOrTitle = await matcher.value()
+    const urlOrTitle = await matcher.value();
+    let handle: string | undefined;
     await this.driver.waitUntil(
         async () => {
-            try {
-                await this.driver.switchWindow(urlOrTitle);
-                return true
-            } catch (err) {
-                return false
-            }
+            handle = await findWindow(this, urlOrTitle);
+            return Boolean(handle);
         },
         {
             timeout: this.config.timeout,
@@ -167,14 +176,16 @@ When('I switch to {value} window', async function (this: QavajsPlaywrightWdioWor
             interval: 500
         }
     );
+    await switchToWindow(this, handle as string);
 });
 
 /**
  * Refresh current page
  * @example I refresh page
  */
-When('I refresh page', async function (this: QavajsPlaywrightWdioWorld, ) {
-    await this.driver.refresh();
+When('I refresh page', async function (this: QavajsPlaywrightWdioWorld) {
+    resetToTab(this);
+    await this.tab.refresh();
 });
 
 /**
@@ -186,7 +197,7 @@ When('I refresh page', async function (this: QavajsPlaywrightWdioWorld, ) {
 When('I press {value} key(s)', async function (this: QavajsPlaywrightWdioWorld, key: MemoryValue) {
     const keySequence: string | string[] = await key.value();
     const keys = parseKeySequence(keySequence);
-    await this.driver.keys(keys);
+    await this.keys(keys);
 });
 
 /**
@@ -200,7 +211,7 @@ When('I press {value} key(s) {int} time(s)', async function (this: QavajsPlaywri
     const keySequence: string | string[] = await key.value();
     const keys = parseKeySequence(keySequence);
     for (let i: number = 0; i < num; i++) {
-        await this.driver.keys(keys);
+        await this.keys(keys);
     }
 });
 
@@ -231,7 +242,7 @@ When('I select {int}(st|nd|rd|th) option from {locator} dropdown', async functio
  * @example I scroll to 'Element'
  */
 When('I scroll to {locator}', async function (this: QavajsPlaywrightWdioWorld, element: Locator) {
-    await this.driver.execute((element: HTMLElement) => element.scrollIntoView(), await element().getElement())
+    await this.target.execute((element: HTMLElement) => element.scrollIntoView(), await element().getElement())
 });
 
 /**
@@ -241,7 +252,8 @@ When('I scroll to {locator}', async function (this: QavajsPlaywrightWdioWorld, e
  * @example I click forward button
  */
 When('I click {browserButton} button', async function (this: QavajsPlaywrightWdioWorld, button: 'back' | 'forward') {
-    await this.driver[button]();
+    resetToTab(this);
+    await this.tab[button]();
 });
 
 /**
@@ -252,7 +264,7 @@ When('I click {browserButton} button', async function (this: QavajsPlaywrightWdi
  */
 When('I scroll by {value}', async function (this: QavajsPlaywrightWdioWorld, offset: MemoryValue) {
     const [deltaX, deltaY] = parseCoords(await offset.value());
-    await this.driver.action('wheel').scroll({
+    await this.target.action('wheel').scroll({
         deltaX,
         deltaY,
         duration: 100
@@ -269,7 +281,7 @@ When('I scroll by {value}', async function (this: QavajsPlaywrightWdioWorld, off
 When('I scroll by {value} in {locator}', async function (this: QavajsPlaywrightWdioWorld, offset: MemoryValue, container: Locator) {
     const [deltaX, deltaY] = parseCoords(await offset.value());
     await container().moveTo();
-    await this.driver.action('wheel').scroll({
+    await this.target.action('wheel').scroll({
         deltaX,
         deltaY,
         duration: 100,
@@ -284,16 +296,29 @@ When('I scroll by {value} in {locator}', async function (this: QavajsPlaywrightW
  * When I scroll until 'Row 99' becomes visible
  */
 When('I scroll until {locator} to be visible', async function (this: QavajsPlaywrightWdioWorld, element: Locator) {
-    const isVisible = async () => element().isDisplayed();
-    while (!await isVisible()) {
-        await this.driver.action('wheel').scroll({
+    await scrollUntilVisible(this, element);
+});
+
+/**
+ * Scroll by 100px steps until element is displayed; fails after `config.timeout`
+ * instead of scrolling forever when the element never appears
+ */
+async function scrollUntilVisible(world: QavajsPlaywrightWdioWorld, element: Locator, origin?: Locator) {
+    await world.driver.waitUntil(async () => {
+        if (await element().isDisplayed()) return true;
+        await world.target.action('wheel').scroll({
             deltaX: 0,
             deltaY: 100,
-            duration: 100
+            duration: 100,
+            ...(origin ? { origin: origin() } : {})
         }).perform();
-        await this.driver.pause(100);
-    }
-});
+        return false;
+    }, {
+        timeout: world.config.timeout,
+        interval: 50,
+        timeoutMsg: 'Element did not become visible while scrolling'
+    });
+}
 
 /**
  * Scroll in container until specified element to be visible
@@ -303,16 +328,7 @@ When('I scroll until {locator} to be visible', async function (this: QavajsPlayw
  * When I scroll in 'List' until 'Row 99' to be visible
  */
 When('I scroll in {locator} until {locator} to be visible', async function (this: QavajsPlaywrightWdioWorld, origin: Locator, element: Locator) {
-    const isVisible = async () => element().isDisplayed();
-    while (!await isVisible()) {
-        await this.driver.action('wheel').scroll({
-            deltaX: 0,
-            deltaY: 100,
-            duration: 100,
-            origin: origin()
-        }).perform();
-        await this.driver.pause(50);
-    }
+    await scrollUntilVisible(this, element, origin);
 });
 
 /**
@@ -332,27 +348,25 @@ When('I upload {value} file to {locator}', async function (this: QavajsPlaywrigh
  * @example I drag and drop 'Bishop' to 'E4'
  */
 When('I drag and drop {locator} to {locator}', async function (this: QavajsPlaywrightWdioWorld, element: Locator, target: Locator) {
-    await this.driver.execute(dragAndDrop, await element().getElement(), await target().getElement());
+    await this.target.execute(dragAndDrop, await element().getElement(), await target().getElement());
 });
 
 /**
  * Open new browser tab
  * @example I open new tab
  */
-When('I open new tab', async function (this: QavajsPlaywrightWdioWorld, ) {
-    await this.driver.execute(() => { window.open('about:blank', '_blank') });
+When('I open new tab', async function (this: QavajsPlaywrightWdioWorld) {
+    await this.target.execute(() => { window.open('about:blank', '_blank') });
 });
 
 /**
  * Click certain coordinates in element
  * @param {string} coords - x, y coordinates to click
  * @param {string} alias - element to click
- * @param {boolean} [disableWait] - disable wait before click
  * @example When I click '0, 20' coordinates in 'Element'
- * @example When I click '0, 20' coordinates in 'Element' (disable actionability wait)
  */
 When('I click {value} coordinates in {locator}', async function (this: QavajsPlaywrightWdioWorld, coordinates: MemoryValue, element: Locator) {
-    const coords = coordinates.value();
+    const coords = await coordinates.value();
     const coordsObject = typeof coords === 'string' ? parseCoordsAsObject(coords) : coords;
     const width = await element().getSize('width');
     const height = await element().getSize('height');
@@ -372,11 +386,13 @@ When('I set window size {value}', async function (this: QavajsPlaywrightWdioWorl
 });
 
 /**
- * Close current browser tab/window
+ * Close current browser tab/window and switch to the tab opened before it
  * @example I close current tab
  */
-When('I close current tab', async function (this: QavajsPlaywrightWdioWorld, ) {
+When('I close current tab', async function (this: QavajsPlaywrightWdioWorld) {
+    const handles = await this.driver.getWindowHandles();
+    const index = handles.indexOf(await this.driver.getWindowHandle());
     await this.driver.closeWindow();
-    const windowHandles = await this.driver.getWindowHandles();
-    await this.driver.switchToWindow(windowHandles[0]);
+    const remaining = await this.driver.getWindowHandles();
+    await switchToWindow(this, remaining[Math.max(index - 1, 0)] ?? remaining[0]);
 });

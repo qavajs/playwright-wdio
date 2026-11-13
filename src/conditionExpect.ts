@@ -1,5 +1,5 @@
 import { expect } from './validationExpect';
-import { ChainablePromiseElement } from 'webdriverio';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 export const conditionValidations = {
     PRESENT: 'present',

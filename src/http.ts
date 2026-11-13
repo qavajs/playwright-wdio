@@ -32,7 +32,7 @@ export class GraphQl {
  * @example
  * When I create 'GET' request 'request'
  */
-When('I create {string} request {value}', function (method: string, key: MemoryValue) {
+When('I create {string} request {value}', function (this: QavajsPlaywrightWdioWorld, method: string, key: MemoryValue) {
     key.set({ method });
 });
 
@@ -41,7 +41,7 @@ When('I create {string} request {value}', function (method: string, key: MemoryV
  * @example
  * When I create GraphQL request 'request'
  */
-When('I create GraphQL request {value}', function (key: MemoryValue) {
+When('I create GraphQL request {value}', function (this: QavajsPlaywrightWdioWorld, key: MemoryValue) {
     key.set(new GraphQl());
 });
 
@@ -67,7 +67,7 @@ When('I add headers to {value}:', async function (this: QavajsPlaywrightWdioWorl
  * @example
  * When I add '$headers' headers to '$request'
  */
-When('I add {value} headers to {value}', async function (headersKey: MemoryValue, requestKey: MemoryValue) {
+When('I add {value} headers to {value}', async function (this: QavajsPlaywrightWdioWorld, headersKey: MemoryValue, requestKey: MemoryValue) {
     const request = await requestKey.value();
     request.headers = Object.assign({}, request.headers, await headersKey.value());
 });
@@ -107,7 +107,7 @@ When('I add body to {value}:', async function (this: QavajsPlaywrightWdioWorld, 
  *         }
  *      }
  **/
-When('I add {gqlRequestProperty} to GraphQL {value}:', async function (property: string, requestKey: MemoryValue, valueString: string) {
+When('I add {gqlRequestProperty} to GraphQL {value}:', async function (this: QavajsPlaywrightWdioWorld, property: string, requestKey: MemoryValue, valueString: string) {
     const request: any = await requestKey.value();
     request[property] = await this.value(valueString);
 });
@@ -145,7 +145,7 @@ When('I add form data body to {value}:', async function (this: QavajsPlaywrightW
  * @example
  * When I add '$body' body to '$request'
  */
-When('I add {value} body to {value}', async function (bodyKey: MemoryValue, requestKey: MemoryValue) {
+When('I add {value} body to {value}', async function (this: QavajsPlaywrightWdioWorld, bodyKey: MemoryValue, requestKey: MemoryValue) {
     const request = await requestKey.value();
     request.data = await bodyKey.value();
 });
@@ -158,7 +158,7 @@ When('I add {value} body to {value}', async function (bodyKey: MemoryValue, requ
  * @example
  * When I add 'https://qavajs.github.io/' url to '$request'
  */
-When('I add {value} url to {value}', async function (urlKey: MemoryValue, requestKey: MemoryValue) {
+When('I add {value} url to {value}', async function (this: QavajsPlaywrightWdioWorld, urlKey: MemoryValue, requestKey: MemoryValue) {
     const request = await requestKey.value();
     request.url = await urlKey.value();
 });
@@ -188,7 +188,7 @@ When('I send {value} request and save response as {value}', async function (this
  * @param response key of the remembered response
  * @param type response body parsing type (buffer|json|text)
  */
-When('I parse {value} body as {bodyParsingType}', async function (responseKey: MemoryValue, type: string) {
+When('I parse {value} body as {bodyParsingType}', async function (this: QavajsPlaywrightWdioWorld, responseKey: MemoryValue, type: string) {
     const response: any = await responseKey.value();
     response.payload = await response[type]();
 });
