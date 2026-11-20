@@ -44,7 +44,7 @@
   },
   "homepage": "https://github.com/qavajs/playwright-wdio#readme",
   "devDependencies": {
-    "@biomejs/biome": "2.6.7",
+    "@biomejs/biome": "2.6.8",
     "@types/express": "^5.0.6",
     "@types/node": "^26.6.6",
     "express": "^5.3.0",
